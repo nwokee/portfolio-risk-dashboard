@@ -34,8 +34,28 @@ cd /Users/YourName/Desktop/portfolio-risk-dashboard
 
 ### Step 2: Install Python Dependencies
 
-Run the following command from inside the project folder:
-
+First, create a virtual environment to keep the project's dependencies isolated from the rest of your system. Run the following commands in order from inside the project folder:
+ 
+**Create the virtual environment:**
+```
+python -m venv .venv
+```
+ 
+**Activate it:**
+ 
+On Mac:
+```
+source .venv/bin/activate
+```
+ 
+On Windows:
+```
+.venv\Scripts\activate
+```
+ 
+You should see `(.venv)` appear at the start of your terminal prompt, confirming the environment is active.
+ 
+**Install dependencies:**
 ```
 pip install -r requirements.txt
 ```
