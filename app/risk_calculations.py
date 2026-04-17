@@ -16,7 +16,7 @@ class RiskCalculator:
 
     def calculate_returns(self, price_data):
         # calculates daily returns from price data
-        returns = price_data['Close'].pct_change().dropna()
+        returns = price_data['Close'].pct_change().dropna().rename("Returns")
         return returns
 
     def calculate_rolling_beta(self, stock_returns, market_returns,
@@ -107,7 +107,7 @@ class RiskCalculator:
 
         rolling_sr = []
 
-         # Loop through each day
+        # Loop through each day
         for i in range(len(stock_returns)):
             if i < window:
                 # Not enough data yet
@@ -146,36 +146,3 @@ class RiskCalculator:
         
         # Return as Series with same index as returns
         return pd.Series(values, index=portfolio_returns.index)
-
-
-if __name__ == "__main__":
-    from data_collector import DataCollector
-    
-    collector = DataCollector()
-    calculator = RiskCalculator()
-    
-    print("Fetching data...")
-    aapl_data = collector.get_stock_data("AAPL", "2y")  # Use 2 years
-    market_data = collector.get_stock_data("^GSPC", "2y")
-    
-    print("\nCalculating returns...")
-    aapl_returns = calculator.calculate_returns(aapl_data)
-    market_returns = calculator.calculate_returns(market_data)
-    
-    print("\nCalculating rolling beta...")
-    beta = calculator.calculate_rolling_beta(aapl_returns, market_returns)
-    
-    print("\nCalculating rolling alpha...")
-    alpha = calculator.calculate_rolling_alpha(aapl_returns, market_returns)
-    
-    print(f"\n=== Results ===")
-    print(f"Latest Beta: {beta.iloc[-1]:.3f}")
-    print(f"Average Beta: {beta.mean():.3f}")
-    print(f"\nLatest Alpha: {alpha.iloc[-1]:.3f}")
-    print(f"Average Alpha: {alpha.mean():.3f}")
-    
-    print(f"\nLast 10 Beta values:")
-    print(beta.tail(10))
-
-    print(f"\nLast 10 Alpha values:")
-    print(alpha.tail(10))

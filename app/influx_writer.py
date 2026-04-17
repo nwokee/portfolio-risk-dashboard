@@ -21,7 +21,6 @@ class InfluxWriter:
         self.write_api = self.client.write_api(write_options=SYNCHRONOUS)
 
         print(f"Connected to InfluxDB at {self.url}")
-        pass
     
     
     def write_portfolio_data(self, results, portfolio_name="default"):
@@ -48,10 +47,6 @@ class InfluxWriter:
         print(f"Wrote {total_points} data points to InfluxDB")
 
         return total_points
-
-
-        
-        pass
     
     
     def write_stock_metrics(self, stocks_data, portfolio_name="default"):
@@ -170,16 +165,3 @@ class InfluxWriter:
     def close(self):
         self.client.close()
         print("InfluxDB connection closed")
-
-
-
-if __name__ == "__main__":
-    from portfolio_processor import PortfolioProcessor
-    
-    processor = PortfolioProcessor()
-    portfolio = processor.load_portfolio("data/test-portfolio.csv")
-    results = processor.process_portfolio(portfolio)
-    
-    writer = InfluxWriter()
-    writer.write_portfolio_data(results)
-    writer.close()

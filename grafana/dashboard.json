@@ -1,0 +1,812 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 1,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "INSERT_DASHBOARD_UID"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Portfolio Value ($)",
+            "axisPlacement": "left",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 3,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 3000,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 10,
+        "x": 0,
+        "y": 0
+      },
+      "id": 11,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.1",
+      "targets": [
+        {
+          "query": "from(bucket: \"market\")\n  |> range(start: -2y)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"portfolio_metrics\")\n  |> filter(fn: (r) => r[\"portfolio\"] == \"${portfolio}\")\n  |> filter(fn: (r) => r[\"metric\"] == \"value\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Portfolio Value Over Time ($5000 base)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "INSERT_DASHBOARD_UID"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": true,
+            "axisColorMode": "text",
+            "axisLabel": "Beta",
+            "axisPlacement": "left",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "area"
+            }
+          },
+          "displayName": "${__field.labels.symbol}",
+          "mappings": [],
+          "max": 4,
+          "min": -1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 1.5
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "custom.lineWidth",
+                "value": 4
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#ffffff",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 14,
+        "x": 10,
+        "y": 0
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "INSERT_DASHBOARD_UID"
+          },
+          "query": "from(bucket: \"market\")\n  |> range(start: -2y)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"stock_metrics\")\n  |> filter(fn: (r) => r[\"portfolio\"] == \"${portfolio}\")\n  |> filter(fn: (r) => r[\"metric\"] == \"beta\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> group(columns: [\"symbol\"])\n  |> keep(columns: [\"_time\", \"_value\", \"symbol\"])",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "INSERT_DASHBOARD_UID"
+          },
+          "hide": false,
+          "query": "from(bucket: \"market\")\n  |> range(start: -2y)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"portfolio_metrics\")\n  |> filter(fn: (r) => r[\"portfolio\"] == \"${portfolio}\")\n  |> filter(fn: (r) => r[\"metric\"] == \"beta\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")",
+          "refId": "B"
+        }
+      ],
+      "title": "Portfolio Beta Over Time",
+      "type": "timeseries"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 19,
+        "w": 10,
+        "x": 0,
+        "y": 8
+      },
+      "id": 14,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"padding: 20px; font-family: Arial; background: #1e1e1e; border-radius: 8px; color: #fff;\">\n  <h3 style=\"margin-top: 0;\">Edit Portfolio</h3>\n  \n  <div id=\"weightInputs\" style=\"margin: 20px 0;\">\n    <p style=\"color: #f39c12;\">Loading current weights...</p>\n  </div>\n  \n  <button id=\"updateBtn\" onclick=\"updateWeights()\" style=\"\n    padding: 12px 24px;\n    background: #27ae60;\n    color: white;\n    border: none;\n    border-radius: 4px;\n    cursor: pointer;\n    font-size: 16px;\n    font-weight: bold;\n    margin-top: 10px;\n  \">\n    Update Portfolio\n  </button>\n  \n  <button onclick=\"resetWeights()\" style=\"\n    padding: 12px 24px;\n    background: #95a5a6;\n    color: white;\n    border: none;\n    border-radius: 4px;\n    cursor: pointer;\n    font-size: 16px;\n    margin-left: 10px;\n  \">\n    Reset to Default\n  </button>\n  <div style=\"margin-top: 20px; padding-top: 15px; border-top: 1px solid #34495e;\">\n    <h4 style=\"margin: 0 0 10px 0; color: #bdc3c7;\">Add Stock</h4>\n    <div style=\"display: flex; gap: 10px; align-items: center;\">\n      <input \n        type=\"text\" \n        id=\"newTickerInput\"\n        placeholder=\"e.g. NVDA\" \n        maxlength=\"10\"\n        style=\"padding: 8px; background: #2c3e50; color: white; border: 1px solid #34495e; border-radius: 4px; width: 100px; text-transform: uppercase;\"\n      >\n      <button onclick=\"addStock()\" style=\"\n        padding: 8px 16px;\n        background: #2980b9;\n        color: white;\n        border: none;\n        border-radius: 4px;\n        cursor: pointer;\n        font-size: 14px;\n      \">+ Add</button>\n      <span id=\"addStockStatus\" style=\"font-size: 13px;\"></span>\n    </div>\n  </div>\n\n\n\n  <div id=\"totalWeight\" style=\"margin: 15px 0; font-size: 18px; font-weight: bold;\"></div>\n  <div id=\"result\" style=\"margin-top: 20px;\"></div>\n  \n  <script>\n    // initialize portfolio id (from grafana)\n    function getPortfolioID() {\n      const params = new URLSearchParams(window.location.search);\n      return params.get('var-portfolio') || 'template';\n    }\n\n    const portfolioID = getPortfolioID();\n\n    // Current weights (loaded from API)\n    let currentWeights = [];\n    let hasNewTickers = false;\n    \n    // Load current weights from API on init\n    async function loadCurrentWeights() {\n      try {\n        const response = await fetch(`http://localhost:8000/api/portfolio/${portfolioID}/weights`);\n        const data = await response.json();\n        \n        currentWeights = data.stocks;\n        initWeightInputs();\n      } catch (error) {\n        console.error('Failed to load weights:', error);\n        currentWeights = JSON.parse(JSON.stringify(defaultWeights));\n        initWeightInputs();\n      }\n    }\n\n    async function loadDefaultWeights() {\n      try {\n        const response = await fetch(`http://localhost:8000/api/portfolio/${portfolioID}/defaults`);\n        const data = await response.json();\n        return data.stocks;\n      } catch (error) {\n        console.error('Failed to load defaults:', error);\n        return null;\n      }\n    }\n\n\n    \n    // Initialize the weight inputs\n    function initWeightInputs() {\n      const container = document.getElementById('weightInputs');\n      container.innerHTML = '';\n      \n      currentWeights.forEach((stock, index) => {\n        const div = document.createElement('div');\n        div.style.cssText = 'margin: 10px 0; display: flex; align-items: center; gap: 10px;';\n        \n        div.innerHTML = `\n          <label style=\"width: 80px; font-weight: bold;\">${stock.symbol}:</label>\n          <input \n            type=\"range\" \n            id=\"weight_${index}\" \n            min=\"0\" max=\"100\" \n            value=\"${stock.weight * 100}\" \n            oninput=\"updateWeight(${index}, this.value)\"\n            style=\"flex: 1;\"\n          >\n          <input \n            type=\"number\" \n            id=\"weight_num_${index}\" \n            min=\"0\" max=\"100\" step=\"1\" \n            value=\"${(stock.weight * 100).toFixed(0)}\" \n            oninput=\"updateWeightFromNumber(${index}, this.value)\"\n            style=\"width: 60px; padding: 5px; background: #2c3e50; color: white; border: 1px solid #34495e; border-radius: 4px;\"\n          >\n          <span style=\"width: 30px;\">%</span>\n          <button \n            onclick=\"removeStock(${index})\"\n            style=\"padding: 4px 8px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer;\"\n            title=\"Remove stock (set weight to 0)\"\n          >✕</button>\n        `;\n        \n        container.appendChild(div);\n      });\n      \n      updateTotalDisplay();\n    }\n    \n    // Update weight from slider\n    function updateWeight(index, value) {\n      const weight = parseFloat(value) / 100;\n      currentWeights[index].weight = weight;\n      document.getElementById(`weight_num_${index}`).value = value;\n      updateTotalDisplay();\n    }\n    \n    // Update weight from number input\n    function updateWeightFromNumber(index, value) {\n      const weight = parseFloat(value) / 100;\n      currentWeights[index].weight = weight;\n      document.getElementById(`weight_${index}`).value = value;\n      updateTotalDisplay();\n    }\n\n    // zero out a stock (removing it)\n    function removeStock(index) {\n      currentWeights[index].weight = 0;\n      document.getElementById(`weight_${index}`).value = 0;\n      document.getElementById(`weight_num_${index}`).value = 0;\n      updateTotalDisplay();\n    }\n    \n    // Display total weight\n    function updateTotalDisplay() {\n      const total = currentWeights.reduce((sum, s) => sum + s.weight, 0);\n      const totalDiv = document.getElementById('totalWeight');\n      \n      const isValid = total >= 0.995 && total <= 1.005;\n      const color = isValid ? '#27ae60' : '#e74c3c';\n      \n      totalDiv.innerHTML = `\n        <span style=\"color: ${color};\">\n          Total Weight: ${(total * 100).toFixed(1)}%\n          ${isValid ? '✓' : 'Must sum to 100%'}\n        </span>\n      `;\n    }\n    \n    // Reset to default weights\n    async function resetWeights() {\n      const defaults = await loadDefaultWeights();\n      \n      if (!defaults || defaults.length === 0) {\n        document.getElementById('result').innerHTML = `\n          <div style=\"padding: 15px; background: #e74c3c; color: white; border-radius: 4px;\">\n            <strong>Reset Failed</strong><br>Could not load default weights.\n          </div>\n        `;\n        return;\n      }\n\n      currentWeights = JSON.parse(JSON.stringify(defaults));\n      initWeightInputs();\n      await updateWeights();\n    }\n\n\n    // add a new ticker to the portfolio\n    async function addStock() {\n      const input = document.getElementById('newTickerInput');\n      const status = document.getElementById('addStockStatus');\n      const symbol = input.value.trim().toUpperCase();\n      \n      if (!symbol) return;\n      \n      status.innerHTML = '<span style=\"color: #f39c12;\">Checking Ticker</span>';\n      \n      try {\n        const response = await fetch(`http://localhost:8000/api/portfolio/${portfolioID}/add-stock`, {\n          method: 'POST',\n          headers: { 'Content-Type': 'application/json' },\n          body: JSON.stringify({ symbol: symbol, weight: 0.10 })\n        });\n        \n        if (!response.ok) {\n          const error = await response.json();\n          throw new Error(error.detail || 'Failed to add stock');\n        }\n        \n        const data = await response.json();\n\n        if (data.is_new_ticker) {\n          hasNewTickers = true;\n        }\n        \n        // Update local weights and re-render\n        currentWeights = data.stocks;\n        initWeightInputs();\n        input.value = '';\n        status.innerHTML = `<span style=\"color: #27ae60;\">${symbol} added: adjust weights and click Update</span>`;\n        \n      } catch (error) {\n        status.innerHTML = `<span style=\"color: #e74c3c;\">✗ ${error.message}</span>`;\n      }\n\n\n    }\n    \n    // Send updated weights to API\n    async function updateWeights() {\n      const resultDiv = document.getElementById('result');\n      const btn = document.getElementById('updateBtn');\n      \n      // Validate total\n      const total = currentWeights.reduce((sum, s) => sum + s.weight, 0);\n      if (total < 0.995 || total > 1.005) {\n        resultDiv.innerHTML = `\n          <div style=\"padding: 15px; background: #e74c3c; color: white; border-radius: 4px;\">\n            <strong>Invalid Weights</strong><br>\n            Total must sum to ~100% (currently ${(total * 100).toFixed(1)}%)\n          </div>\n        `;\n        return;\n      }\n      \n      // Show loading\n      btn.disabled = true;\n      btn.style.background = '#95a5a6';\n      resultDiv.innerHTML = '<p style=\"color: #f39c12;\">Updating portfolio...</p>';\n      \n      try {\n        const response = await fetch('http://localhost:8000/api/portfolio/update-weights', {\n          method: 'POST',\n          headers: {\n            'Content-Type': 'application/json',\n          },\n          body: JSON.stringify({\n            port_id: portfolioID,\n            stocks: currentWeights\n          })\n        });\n        \n        if (!response.ok) {\n          const error = await response.json();\n          throw new Error(error.detail || 'Update failed');\n        }\n        \n        const data = await response.json();\n        \n        resultDiv.innerHTML = `\n          <div style=\"padding: 15px; background: #27ae60; color: white; border-radius: 4px;\">\n            <strong>Portfolio Updated</strong><br><br>\n            <strong>Latest Metrics:</strong><br>\n            Beta: ${data.metrics.beta.toFixed(3)}<br>\n            Alpha: ${data.metrics.alpha.toFixed(3)}<br>\n            Sharpe: ${data.metrics.sharpe.toFixed(3)}<br>\n            Value: $${data.metrics.value.toFixed(2)}<br>\n            Return: ${data.metrics.return_pct.toFixed(2)}%<br><br>\n            <em>Refreshing dashboard...</em>\n          </div>\n        `;\n        \n        // Auto-refresh dashboard after 2 seconds (7 for ticker additions)\n        const reloadDelay = hasNewTickers ? 7000 : 2000;\n\n        resultDiv.innerHTML = `\n          <div style=\"padding: 15px; background: #27ae60; color: white; border-radius: 4px;\">\n            <strong>Portfolio Updated</strong><br><br>\n            ...metrics...\n            <em>${hasNewTickers ? 'Fetching new ticker data, refreshing in 7s...' : 'Refreshing dashboard...'}</em>\n          </div>\n        `;\n\n        setTimeout(() => { window.top.location.reload(); }, reloadDelay);\n\n        // reset flag after update\n        hasNewTickers = false;\n        \n      } catch (error) {\n        resultDiv.innerHTML = `\n          <div style=\"padding: 15px; background: #e74c3c; color: white; border-radius: 4px;\">\n            <strong>Update Failed</strong><br>\n            ${error.message}\n          </div>\n        `;\n      } finally {\n        btn.disabled = false;\n        btn.style.background = '#27ae60';\n      }\n    }\n    \n    // Initialize on load\n    loadCurrentWeights();\n  </script>\n</div>",
+        "mode": "html"
+      },
+      "pluginVersion": "12.1.1",
+      "title": "Weight Adjustments",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "INSERT_DASHBOARD_UID"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Alpha",
+            "axisPlacement": "left",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "area"
+            }
+          },
+          "displayName": "${__field.labels.symbol}",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "custom.lineWidth",
+                "value": 4
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#ffffff",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 14,
+        "x": 10,
+        "y": 8
+      },
+      "id": 10,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "INSERT_DASHBOARD_UID"
+          },
+          "query": "from(bucket: \"market\")\n  |> range(start: -2y)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"stock_metrics\")\n  |> filter(fn: (r) => r[\"portfolio\"] == \"${portfolio}\")\n  |> filter(fn: (r) => r[\"metric\"] == \"alpha\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> group(columns: [\"symbol\"])\n  |> keep(columns: [\"_time\", \"_value\", \"symbol\"])",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "INSERT_DASHBOARD_UID"
+          },
+          "hide": false,
+          "query": "from(bucket: \"market\")\n  |> range(start: -2y)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"portfolio_metrics\")\n  |> filter(fn: (r) => r[\"portfolio\"] == \"${portfolio}\")\n  |> filter(fn: (r) => r[\"metric\"] == \"alpha\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")",
+          "refId": "B"
+        }
+      ],
+      "title": "Portfolio Alpha Over Time",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "INSERT_DASHBOARD_UID"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Sharpe Ratio",
+            "axisPlacement": "left",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "area"
+            }
+          },
+          "displayName": "${__field.labels.symbol}",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "#EAB839",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 2
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 4
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "custom.lineWidth",
+                "value": 4
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#ffffff",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 14,
+        "x": 10,
+        "y": 17
+      },
+      "id": 9,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "INSERT_DASHBOARD_UID"
+          },
+          "query": "from(bucket: \"market\")\n  |> range(start: -2y)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"stock_metrics\")\n  |> filter(fn: (r) => r[\"portfolio\"] == \"${portfolio}\")\n  |> filter(fn: (r) => r[\"metric\"] == \"sharpe\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> group(columns: [\"symbol\"])\n  |> keep(columns: [\"_time\", \"_value\", \"symbol\"])",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "INSERT_DASHBOARD_UID"
+          },
+          "hide": false,
+          "query": "from(bucket: \"market\")\n  |> range(start: -2y)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"portfolio_metrics\")\n  |> filter(fn: (r) => r[\"portfolio\"] == \"${portfolio}\")\n  |> filter(fn: (r) => r[\"metric\"] == \"sharpe\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")",
+          "refId": "B"
+        }
+      ],
+      "title": "Portfolio Sharpe Ratio Over Time",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "INSERT_DASHBOARD_UID"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false,
+            "width": 120
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "Allocation|Buy|Current|Gain"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "Weight|Return"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "unit",
+                "value": "percent"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Price per Share"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 24,
+        "x": 0,
+        "y": 27
+      },
+      "id": 12,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "frameIndex": 0,
+        "showHeader": true
+      },
+      "pluginVersion": "12.1.1",
+      "targets": [
+        {
+          "query": "from(bucket: \"market\")\n  |> range(start: -1d)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"portfolio_holdings\")\n  |> filter(fn: (r) => r[\"portfolio\"] == \"${portfolio}\")\n  |> pivot(rowKey:[\"symbol\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group()\n  |> map(fn: (r) => ({\n      symbol: r.symbol,\n      Weight: r.weight * 100.0,\n      Allocation: r.allocation,\n      Shares: r.shares,\n      \"Buy PPS\": r.initial_price,\n      \"Current PPS\": r.current_price,\n      \"Current Value\": r.current_value,\n      \"Gain/Loss\": r.current_value - r.allocation,\n      Return: ((r.current_value - r.allocation) / r.allocation) * 100.0\n  }))\n  |> keep(columns: [\n      \"symbol\",\n      \"Weight\",\n      \"Allocation\",\n      \"Shares\",\n      \"Buy PPS\",\n      \"Current PPS\",\n      \"Current Value\",\n      \"Gain/Loss\",\n      \"Return\"\n  ])\n  |> sort(columns: [\"symbol\"])",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "INSERT_DASHBOARD_UID"
+          },
+          "hide": false,
+          "query": "from(bucket: \"market\")\n  |> range(start: -7d)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"stock_metrics\")\n  |> filter(fn: (r) => r[\"portfolio\"] == \"${portfolio}\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> group(columns: [\"symbol\", \"metric\"])\n  |> last()\n  |> group()\n  |> pivot(rowKey:[\"symbol\"], columnKey: [\"metric\"], valueColumn: \"_value\")\n  |> sort(columns: [\"symbol\"])",
+          "refId": "B"
+        }
+      ],
+      "title": "Current Portfolio Holdings",
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "includeByName": {},
+            "indexByName": {
+              "Allocation": 12,
+              "Buy PPS": 9,
+              "Current PPS": 10,
+              "Current Value": 3,
+              "Gain/Loss": 4,
+              "Return": 5,
+              "Shares": 2,
+              "Weight": 1,
+              "alpha": 7,
+              "beta": 6,
+              "price": 11,
+              "sharpe": 8,
+              "symbol": 0
+            },
+            "renameByName": {
+              "Allocation": "",
+              "Buy PPS": "",
+              "Current PPS": "",
+              "Current Value": "",
+              "Gain/Loss": "Net Gain",
+              "Shares": "",
+              "Weight": "",
+              "alpha": "Alpha",
+              "beta": "Beta",
+              "sharpe": "Sharpe Ratio",
+              "symbol": "Stock"
+            }
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "Stock",
+                "Weight",
+                "Shares",
+                "Current Value",
+                "Return",
+                "Beta",
+                "Alpha",
+                "Sharpe Ratio",
+                "Buy PPS",
+                "Current PPS",
+                "Allocation",
+                "Net Gain"
+              ]
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 4,
+        "x": 0,
+        "y": 38
+      },
+      "id": 13,
+      "options": {
+        "code": {
+          "language": "html",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"padding: 20px; background: #2c3e50; color: white; border-radius: 8px;\">\n  <h3>API Test</h3>\n  <button onclick=\"runTest()\" style=\"padding: 10px 20px; font-size: 16px; cursor: pointer;\">\n    Click to Test\n  </button>\n  <p id=\"output\" style=\"margin-top: 20px; font-size: 18px;\">Click the button above</p>\n  \n  <script>\n    function runTest() {\n      document.getElementById('output').innerHTML = '⏳ Testing...';\n      \n      fetch('http://localhost:8000/api/test')\n        .then(res => res.json())\n        .then(data => {\n          document.getElementById('output').innerHTML = \n            data.message;\n        })\n        .catch(err => {\n          document.getElementById('output').innerHTML = \n            err.message;\n        });\n    }\n  </script>\n</div>",
+        "mode": "html"
+      },
+      "pluginVersion": "12.1.1",
+      "title": "API Connection Test",
+      "type": "text"
+    }
+  ],
+  "preload": false,
+  "refresh": "",
+  "schemaVersion": 41,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "1mo",
+          "value": "1mo"
+        },
+        "description": "The viewing time period for the user",
+        "hide": 2,
+        "label": "Time Window",
+        "name": "time_window",
+        "options": [
+          {
+            "selected": true,
+            "text": "1 month",
+            "value": "1mo"
+          },
+          {
+            "selected": false,
+            "text": "3 months",
+            "value": "3mo"
+          },
+          {
+            "selected": false,
+            "text": "6 months",
+            "value": "6mo"
+          },
+          {
+            "selected": false,
+            "text": "1 year",
+            "value": "1y"
+          },
+          {
+            "selected": false,
+            "text": "2 years",
+            "value": "2y"
+          },
+          {
+            "selected": false,
+            "text": "All data",
+            "value": "2y"
+          }
+        ],
+        "query": "1 month : 1mo,\n3 months : 3mo,\n6 months : 6mo,\n1 year : 1y,\n2 years : 2y,\nAll data : 2y",
+        "type": "custom"
+      },
+      {
+        "current": {
+          "text": "template",
+          "value": "template"
+        },
+        "definition": "import \"influxdata/influxdb/schema\"\n   schema.tagValues(\n     bucket: \"market\",\n     tag: \"portfolio\",\n     predicate: (r) => r._measurement == \"stock_metrics\"\n   )",
+        "label": "Portfolio",
+        "name": "portfolio",
+        "options": [],
+        "query": {
+          "query": "import \"influxdata/influxdb/schema\"\n   schema.tagValues(\n     bucket: \"market\",\n     tag: \"portfolio\",\n     predicate: (r) => r._measurement == \"stock_metrics\"\n   )"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6M",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Portfolio Risk Analysis Dashboard",
+  "uid": "dbde318c-2035-4561-b94c-7a82e6eb3f51",
+  "version": 58
+}

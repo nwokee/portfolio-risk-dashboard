@@ -1,14 +1,13 @@
 ## Purpose: collecting data from yfinance to use for calculations and visualizations
 ## Additional features: caching system to limit yfinance calls to stocks older than 1 day
 
-
-
 import yfinance as yf
 import pandas as pd
 import json
-import os
+import time
 from datetime import datetime, timedelta
 from pathlib import Path
+from risk_calculations import RiskCalculator
 
 
 class DataCollector:
@@ -19,7 +18,7 @@ class DataCollector:
         self.cache_dir.mkdir(exist_ok=True)
 
     # Collect data only if needed (we dont have it in cache)
-    def get_stock_data(self, symbol, period="2y"):
+    def get_stock_data(self, symbol, period="2y", market_data=None):
         cache_file = self.cache_dir / f"{symbol}_{period}.json"
 
     
@@ -28,7 +27,6 @@ class DataCollector:
             # check cache age
             file_modified_time = datetime.fromtimestamp(cache_file.stat().st_mtime)
             cache_age = datetime.now() - file_modified_time
-            # print(f"current cache age: {cache_age.total_seconds() / 3600:.1f} hours")
 
             if cache_age < timedelta(days=1):
                 # cache is still relevant, load
@@ -38,16 +36,14 @@ class DataCollector:
                 df = pd.DataFrame(data_dict)
 
                 if 'Date' in df.columns:
-                    df['Date'] = pd.to_datetime(df['Date'])
+                    df['Date'] = pd.to_datetime(df['Date'],utc=True)
                     df.set_index('Date', inplace=True)
                 
-                # print(f"loaded rows: {len(df)}")
                 return df
             # else, the cache file isnt relevant anymore, so treat it as if
             # it never existed
 
-        #cache does not exist, get new data for the symbol
-        # print(f"Fetching new data for {symbol}")
+        # cache does not exist, get new data for the symbol
         
         try: 
             ticker = yf.Ticker(symbol)
@@ -55,86 +51,53 @@ class DataCollector:
 
             if hist.empty:
                 #no data found, return nothing
-                # print(f"No data found for {symbol}")
                 return None
             
-            # save to cache for future use
-            to_save = hist.reset_index()
+            time.sleep(1) # delaying yfinance call to prevent yfinance rate limit
+
+            to_save = hist.copy()
+
+            # grab market data and add returns if needed
+            if symbol != "^GSPC" and market_data is None:
+                market_data = self.get_stock_data("^GSPC",period="2y")
+                calculator = RiskCalculator()
+
+                # calculate returns for stock and market
+                s_returns = calculator.calculate_returns(hist)
+                m_returns = calculator.calculate_returns(market_data)
+                
+                # calculate risk metrics
+                s_beta = calculator.calculate_rolling_beta(s_returns, m_returns)
+                s_alpha = calculator.calculate_rolling_alpha(s_returns, m_returns)
+                s_sharpe = calculator.calculate_rolling_sharpe(s_returns)
+
+                # add metrics to hist df (NaNs are fine at the beginning)
+                to_save = pd.merge(to_save, s_returns, left_index=True, right_index=True, how='left')
+                to_save['Beta'] = s_beta
+                to_save['Alpha'] = s_alpha
+                to_save['Sharpe'] = s_sharpe
+
+        
+            
+            to_save = to_save.reset_index()
             data_dict = to_save.to_dict(orient='records')
 
             with open(cache_file, 'w') as f:
                 json.dump(data_dict, f, default=str)
 
-            # print(f"saved to {cache_file}")
-            return hist
+            return to_save
         
         except Exception as e:
             print(f"Error collecting data for {symbol}: {e}")
             return None
 
-
-    def get_stock_info(self, symbol):
-        cache_file = self.cache_dir / f"{symbol}_info.json"
-
-    
-        # check if file exists already (and is no older than a day)
-        if cache_file.exists():
-            # check cache age
-            file_modified_time = datetime.fromtimestamp(cache_file.stat().st_mtime)
-            cache_age = datetime.now() - file_modified_time
-            # print(f"current cache age: {cache_age.total_seconds() / 3600:.1f} hours")
-
-            if cache_age < timedelta(days=7):
-                # cache is still relevant, load
-                with open(cache_file, 'r') as f:
-                    return json.load(f)
-            # else, the cache file isnt relevant anymore, so treat it as if
-            # it never existed
         
+    def check_ticker(self, symbol):
+        # checks if the given stock ticker exists
         try:
             ticker = yf.Ticker(symbol)
-            info = ticker.info
-        
-        # Extract only info that would be needed
-            relevant_info = {
-                'symbol': symbol,
-                'shortName': info.get('shortName', symbol),
-                'sector': info.get('sector', 'Unknown'),
-                'industry': info.get('industry', 'Unknown'),
-                'marketCap': info.get('marketCap', 0),
-                'country': info.get('country')
-            }
-        
-            # save to cache for future use
-            with open(cache_file, 'w') as f:
-                json.dump(relevant_info, f)
-        
-            return relevant_info
-        
-        except Exception as e:
-            print(f"Error fetching info for {symbol}: {e}")
-            return {'symbol': symbol, 'shortName': symbol}
-
-# Test the code
-if __name__ == "__main__":
-    print("=== Testing DataCollector ===\n")
-    
-    # Create collector
-    collector = DataCollector()
-    
-    # Test with Apple stock
-    print("\n--- First fetch (will download) ---")
-    data1 = collector.get_stock_data("AAPL", "2y")
-    
-    if data1 is not None:
-        print(f"\nData shape: {data1.shape}")
-        print(f"\nFirst few rows:")
-        print(data1.head())
-        print(f"\nColumns: {data1.columns.tolist()}")
-    
-    # Test again (should use cache)
-    print("\n\n--- Second fetch (should use cache) ---")
-    data2 = collector.get_stock_data("AAPL", "2y")
-    
-    if data2 is not None:
-        print(f"\nData shape: {data2.shape}")
+            hist = ticker.history(period="5d")
+            time.sleep(1)
+            return not hist.empty
+        except:
+            return False

@@ -10,8 +10,8 @@ class PortfolioProcessor:
 
 
     def __init__(self):
-        data_coll = self.data_collector = DataCollector()
-        risk_calc = self.risk_calculator = RiskCalculator()
+        self.data_collector = DataCollector()
+        self.risk_calculator = RiskCalculator()
 
     
     def load_portfolio(self, csv_path):
@@ -24,7 +24,6 @@ class PortfolioProcessor:
         port['symbol'] = port['symbol'].str.upper()
         port['weight'] = port['weight'].astype(float)
     
-        #DEBUGGING: Validation
         print(f"Loaded portfolio with {len(port)} stocks:")
         print(port.to_string(index=False))
         print(f"\nTotal weight: {port['weight'].sum():.2f}")
@@ -35,6 +34,47 @@ class PortfolioProcessor:
             print("Warning: Weights don't sum to 1.0")
 
         return port
+
+    ## for aggregating data more efficiently
+    def metric_matrices(self, stocks_data):
+
+        returns_df = pd.DataFrame()
+        beta_df = pd.DataFrame()
+        alpha_df = pd.DataFrame()
+        sharpe_df = pd.DataFrame()
+        weights = {}
+
+
+
+        for symbol, data in stocks_data.items():
+            returns_df[symbol] = data['returns']
+            beta_df[symbol] = data['beta']
+            alpha_df[symbol] = data['alpha']
+            sharpe_df[symbol] = data['sharpe']
+            weights[symbol] = data['weight']
+        
+        weights = pd.Series(weights)
+
+        return {
+            "returns": returns_df,
+            "beta": beta_df,
+            "alpha": alpha_df,
+            "sharpe": sharpe_df,
+            "weights": weights
+        }
+    
+    def metric_weighted_sum(self, df, weights):
+        valid_mask = df.notna()
+        valid_weight_sum = valid_mask.mul(weights, axis=1).sum(axis=1)
+        weighted_values = df.mul(weights, axis=1)
+        weighted_sum = weighted_values.sum(axis=1)
+        result = weighted_sum / valid_weight_sum
+        result[valid_weight_sum == 0] = np.nan
+    
+        return result
+
+
+
 
     def process_portfolio(self, portfolio_df, period="2y",initial_investment=5000):
 
@@ -67,22 +107,19 @@ class PortfolioProcessor:
                 print(f"Skipping {symbol} - no data available")
                 continue
 
-            stock_returns = self.risk_calculator.calculate_returns(stock_data)
-            rolling_beta = self.risk_calculator.calculate_rolling_beta(stock_returns, market_returns)
-            rolling_alpha = self.risk_calculator.calculate_rolling_alpha(stock_returns, market_returns)
-            rolling_rs = self.risk_calculator.calculate_rolling_sharpe(stock_returns)
-
+            # calculate holdings info
             allocation = initial_investment * weight 
             initial_price = stock_data['Close'].iloc[0]  
             num_shares = allocation / initial_price
 
+            # collect and store all metrics and info
             results['stocks'][symbol] = {
                 'weight': weight,
                 'prices': stock_data['Close'],
-                'returns': stock_returns,
-                'beta': rolling_beta,
-                'alpha': rolling_alpha,
-                'sharpe': rolling_rs,
+                'returns': stock_data['Returns'].dropna(),
+                'beta': stock_data['Beta'].dropna(),
+                'alpha': stock_data['Alpha'].dropna(),
+                'sharpe': stock_data['Sharpe'].dropna(),
                 'allocation': allocation,
                 'initial_price': initial_price,
                 'shares': num_shares,
@@ -96,25 +133,25 @@ class PortfolioProcessor:
         print("Calculating portfolio returns and value...")
         
         # Calculate weighted portfolio returns
-        portfolio_returns = None
+        weighted_port = self.metric_matrices(results['stocks'])
+        returns_df = weighted_port['returns']
+        beta_df = weighted_port['beta']
+        alpha_df = weighted_port['alpha']
+        sharpe_df = weighted_port['sharpe']
+        weights = weighted_port['weights']
         
-        for symbol, data in results['stocks'].items():
-            weighted_returns = data['returns'] * data['weight']
-            
-            if portfolio_returns is None:
-                portfolio_returns = weighted_returns
-            else:
-                portfolio_returns = portfolio_returns.add(weighted_returns, fill_value=0)
-        
+        portfolio_returns = returns_df.mul(weights, axis = 1).sum(axis = 1)
+        portfolio_beta = self.metric_weighted_sum(beta_df, weights)
+        portfolio_alpha = self.metric_weighted_sum(alpha_df, weights)
+        portfolio_sr = self.metric_weighted_sum(sharpe_df, weights)
+
+
         # Calculate portfolio value over time
         portfolio_value = self.risk_calculator.calculate_portfolio_value(
             portfolio_returns, 
             initial_value=initial_investment
         )
         
-        # Store in results
-        results['portfolio']['value'] = portfolio_value
-        results['portfolio']['returns'] = portfolio_returns
         
         # Print final value
         final_value = portfolio_value.iloc[-1]
@@ -126,27 +163,6 @@ class PortfolioProcessor:
         print(f"  Final Value: ${final_value:.2f}")
         print(f"  Total Return: {total_return:.2f}%")  
 
-        print("Calculating portfolio metrics")
-
-        portfolio_beta = None
-        portfolio_alpha = None
-        portfolio_sr = None
-
-        for symbol, data in results['stocks'].items():
-            
-            # weighted calculations
-            weighted_beta = data['beta'] * data['weight']
-            weighted_alpha = data['alpha'] * data['weight']
-            weighted_sharpe = data['sharpe'] * data['weight']
-
-            if portfolio_beta is None:
-                portfolio_beta = weighted_beta
-                portfolio_alpha = weighted_alpha
-                portfolio_sr = weighted_sharpe
-            else:
-                portfolio_beta = portfolio_beta.add(weighted_beta, fill_value=0)
-                portfolio_alpha = portfolio_alpha.add(weighted_alpha, fill_value=0)
-                portfolio_sr = portfolio_sr.add(weighted_sharpe, fill_value=0)
 
         results['portfolio']['beta'] = portfolio_beta
         results['portfolio']['alpha'] = portfolio_alpha
@@ -162,21 +178,3 @@ class PortfolioProcessor:
         print(f"Latest Portfolio Value: ${portfolio_value.iloc[-1]:.2f}")
 
         return results
-
-if __name__ == "__main__":
-    processor = PortfolioProcessor()
-    portfolio = processor.load_portfolio("data/test-portfolio.csv")
-    port2 = processor.load_portfolio("data/test-port-2.csv")
-    print("\nPortfolios loaded successfully!")
-    
-    results = processor.process_portfolio(portfolio, period="2y")
-    
-    if results:
-        print("\n" + "="*50)
-        print("Individual Stock Latest Values:")
-        print("="*50)
-        for symbol, data in results['stocks'].items():
-            print(f"{symbol:6} - Beta: {data['beta'].iloc[-1]:6.3f}  "
-                f"Alpha: {data['alpha'].iloc[-1]:7.3f}  "
-                f"Sharpe: {data['sharpe'].iloc[-1]:6.3f}  " 
-                f"Weight: {data['weight']:.2f}")
