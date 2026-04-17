@@ -120,9 +120,11 @@ Copy the ID at the end of the URL; you will need it in the next step.
 Before importing, you need to update the dashboard file with your Grafana UID to prevent a connection error after import.
 
 **5a: Update the dashboard file**
+
 Open `grafana/dashboard.json` in any text editor. Use Find and Replace to find `INSERT_DASHBOARD_UID` and replace all instances with the UID you copied at the end of Step 4. Save the file.
  
 **5b: Import the dashboard**
+
 In Grafana, navigate to **Dashboards. Click **New** on the top right, then **Import**. Click **Upload JSON file** and select the updated `grafana/dashboard.json` from the project folder. 
 
 The dashboard will appear but will show no data yet.
