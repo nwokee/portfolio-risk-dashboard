@@ -40,6 +40,10 @@ First, create a virtual environment to keep the project's dependencies isolated 
 ```
 python -m venv .venv
 ```
+Note: if the terminal tells you python not found, you may have to type this instead
+```
+python3 -m venv .venv
+```
  
 **Activate it:**
  
@@ -66,11 +70,11 @@ This may take a minute to complete.
 
 ### Step 3: Start Docker Containers
 
-Run the following 2 commands to start InfluxDB and Grafana:
+Open Docker and log in or create and account, then go back to your terminal and run the following 2 commands to start InfluxDB and Grafana:
 
 ```
 cd docker
-docker compose up -d
+docker-compose up -d
 ```
 
 Wait a little for it to finish on the first instance. Once it is done it will be running in the background, and you can run
