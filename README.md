@@ -70,14 +70,14 @@ This may take a minute to complete.
 
 ### Step 3: Start Docker Containers
 
-Open Docker and log in or create and account, then go back to your terminal and run the following 2 commands to start InfluxDB and Grafana:
+Open Docker and log in or create an account, then go back to your terminal and run the following 2 commands to start InfluxDB and Grafana:
 
 ```
 cd docker
 docker-compose up -d
 ```
 
-Wait a little for it to finish on the first instance. Once it is done it will be running in the background, and you can run
+Wait a little for it to finish on the first instance. Once it is done, it will be running in the background, and you can run
 ```
 cd ..
 ```
@@ -117,7 +117,7 @@ Copy the ID at the end of the URL; you will need it in the next step.
 
 ### Step 5: Import the Grafana Dashboard
 
-Before importing, you need to update the dashboard file with your Grafana UID to prevent a connection error after import.
+Before importing, update the dashboard file with your Grafana UID to prevent a connection error after import.
 
 **5a: Update the dashboard file**
 
@@ -125,9 +125,9 @@ Open `grafana/dashboard.json` in any text editor. Use Find and Replace to find `
  
 **5b: Import the dashboard**
 
-In Grafana, navigate to **Dashboards. Click **New** on the top right, then **Import**. Click **Upload JSON file** and select the updated `grafana/dashboard.json` from the project folder. 
+In Grafana, navigate to **Dashboards**. Click **New** on the top right, then **Import**. Click **Upload JSON file** and select the updated `grafana/dashboard.json` from the project folder. 
 
-The dashboard will appear but will show no data yet.
+The dashboard will appear, but will show no data yet.
 
 ---
 
@@ -141,7 +141,7 @@ python load_dashboard.py
 
 This will process all portfolio CSV files, calculate rolling risk metrics for every stock, and write the results to InfluxDB. The process takes several minutes as it downloads up to two years of price history per stock. Progress will be printed to the terminal as each portfolio loads.
 
-When you see **"All portfolios loaded"** the data is ready.
+When you see **"All portfolios loaded"**, the data is ready.
 
 ---
 
@@ -162,6 +162,30 @@ Leave this terminal window open. The API must be running at all times for the we
 Go back to Grafana at `http://localhost:3000`, navigate to **Dashboards**, and open the **Portfolio Risk Dashboard**. All panels should now be populated with data.
 
 The dashboard is now ready to use.
+
+### Step 9: Closing the Dashboard
+
+To close the dashboard, exit out of the Grafana tab, and go to the terminal and press Ctrl+C. This shuts down the API. Lastly, in the terminal, run these 3 commands.
+
+```
+cd docker
+docker-compose down
+cd ..
+```
+Your data and portfolio stats are preserved automatically.
+
+### Relaunch
+
+To reopen the dashboard, type the following commands in order in the project terminal:
+```
+.venv\Scripts\activate   # for Mac: source .venv/bin/activate
+cd docker
+docker-compose up -d
+cd ..
+python load_dashboard.py
+python run_api.py
+```
+Once the API is running again, go to `http://localhost:3000`, and you will be able to use the dashboard as normal.
 
 ---
 
